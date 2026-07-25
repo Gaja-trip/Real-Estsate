@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>공인중개사 기출 풀이 앱</title>
+    <meta
+      name="description"
+      content="공인중개사 기출문제를 PDF로 보면서 답안을 체크하고 채점할 수 있는 설치형 웹앱"
+    />
+    <meta name="theme-color" content="#0f3d3e" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="./public/icon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-bg bg-a"></div>
+    <div class="page-bg bg-b"></div>
+    <div class="shell">
+      <header class="topbar">
+        <a class="brand" href="#home">
+          <span class="brand-mark">RE</span>
+          <span class="brand-copy">
+            <strong>공인중개사 기출 풀이 앱</strong>
+            <small>PDF 기반 학습 워크스페이스</small>
+          </span>
+        </a>
+
+        <nav class="nav">
+          <a href="#solve">문제 풀기</a>
+          <a href="#library">자료실</a>
+          <a href="https://www.law.go.kr/" target="_blank" rel="noreferrer">국가법령정보센터</a>
+        </nav>
+      </header>
+
+      <main id="home">
+        <section class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">Installable Study App</p>
+            <h1>기출문제를 보면서 바로 풀고, 저장하고, 채점하세요.</h1>
+            <p class="hero-text">
+              2021년 제32회 공인중개사 1차 1교시 B형을 PDF 그대로 보면서 답안을 입력할 수 있고,
+              공식 정답 기준으로 즉시 채점할 수 있습니다. 2024년 제35회 최종정답 PDF도 함께
+              자료실에 넣어 두었습니다.
+            </p>
+
+            <div class="hero-actions">
+              <a class="primary-button" href="#solve">지금 풀기</a>
+              <button id="installButton" class="ghost-button" type="button">앱처럼 설치</button>
+              <button id="resetProgressButton" class="secondary-button" type="button">풀이 초기화</button>
+            </div>
+
+            <div class="hero-badges">
+              <span>2021 제32회 1차 1교시 B형 채점 지원</span>
+              <span>2024 제35회 공식 정답 PDF 포함</span>
+              <span>진도 자동 저장</span>
+            </div>
+          </div>
+
+          <aside class="hero-panel">
+            <div class="metric-card">
+              <span class="metric-label">현재 지원 시험</span>
+              <strong class="metric-value">1개</strong>
+              <p>채점 가능한 세트: 2021년 제32회 1차 1교시 B형</p>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">자료 PDF</span>
+              <strong class="metric-value">3개</strong>
+              <p>문제지 1개, 정답표 2개를 앱 안에서 바로 열 수 있습니다.</p>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">법령 바로가기</span>
+              <strong class="metric-value">1클릭</strong>
+              <p>국가법령정보센터로 이동해 관련 조문을 바로 확인할 수 있습니다.</p>
+            </div>
+          </aside>
+        </section>
+
+        <section id="solve" class="section">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Solve</p>
+              <h2>2021년 제32회 1차 1교시 B형</h2>
+            </div>
+            <div class="status-row">
+              <span id="saveStatus" class="chip">진도 저장 대기</span>
+              <span id="progressCount" class="chip accent-chip">0 / 80 답안 입력</span>
+            </div>
+          </div>
+
+          <div class="solve-layout">
+            <article class="panel viewer-panel">
+              <div class="panel-head">
+                <h3>문제 PDF 보기</h3>
+                <div class="panel-actions">
+                  <a class="mini-link" href="./public/pdfs/2021-question.pdf" target="_blank" rel="noreferrer">새 창으로 열기</a>
+                  <a class="mini-link" href="./public/pdfs/2021-answer.pdf" target="_blank" rel="noreferrer">공식 정답 PDF</a>
+                </div>
+              </div>
+              <iframe
+                class="pdf-frame"
+                src="./public/pdfs/2021-question.pdf#page=1"
+                title="2021년 제32회 공인중개사 1차 1교시 B형 문제지"
+              ></iframe>
+            </article>
+
+            <div class="workspace-column">
+              <article class="panel exam-panel">
+                <div class="panel-head">
+                  <h3>답안 입력</h3>
+                  <button id="gradeButton" class="primary-button" type="button">채점하기</button>
+                </div>
+
+                <div class="section-tabs">
+                  <button class="tab-button active" type="button" data-section="0">부동산학개론 1-40</button>
+                  <button class="tab-button" type="button" data-section="1">민법및민사특별법 41-80</button>
+                </div>
+
+                <div id="answerSheet" class="answer-sheet"></div>
+              </article>
+
+              <article class="panel result-panel">
+                <div class="panel-head">
+                  <h3>채점 결과</h3>
+                  <button id="showAnswersButton" class="ghost-button" type="button">정답 보기</button>
+                </div>
+                <div id="resultSummary" class="result-summary empty-message">
+                  아직 채점 전입니다. 답안을 입력한 뒤 채점해 보세요.
+                </div>
+                <div id="resultDetails" class="result-details"></div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="library" class="section">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Library</p>
+              <h2>PDF 자료실</h2>
+            </div>
+            <span class="chip">문제지/정답지 보관</span>
+          </div>
+
+          <div class="library-grid">
+            <article class="panel library-card">
+              <div class="panel-head">
+                <h3>2021 문제지</h3>
+                <span class="chip">B형</span>
+              </div>
+              <p>2021년 제32회 공인중개사 자격시험 1차 1교시 B형 문제지입니다.</p>
+              <div class="card-actions">
+                <a class="primary-button" href="./public/pdfs/2021-question.pdf" target="_blank" rel="noreferrer">PDF 열기</a>
+              </div>
+            </article>
+
+            <article class="panel library-card">
+              <div class="panel-head">
+                <h3>2021 공식 정답</h3>
+                <span class="chip">최종정답</span>
+              </div>
+              <p>2021년 제32회 공인중개사 자격시험 정답 PDF입니다. 1차 1교시 B형 채점 기준으로 사용합니다.</p>
+              <div class="card-actions">
+                <a class="primary-button" href="./public/pdfs/2021-answer.pdf" target="_blank" rel="noreferrer">PDF 열기</a>
+              </div>
+            </article>
+
+            <article class="panel library-card">
+              <div class="panel-head">
+                <h3>2024 공식 정답</h3>
+                <span class="chip">제35회</span>
+              </div>
+              <p>2024년 제35회 공인중개사 자격시험 최종정답 PDF입니다. 참고 자료로 바로 열어볼 수 있습니다.</p>
+              <div class="card-actions">
+                <a class="primary-button" href="./public/pdfs/2024-answer.pdf" target="_blank" rel="noreferrer">PDF 열기</a>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

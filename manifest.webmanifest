@@ -1,0 +1,17 @@
+{
+  "name": "공인중개사 기출 풀이 앱",
+  "short_name": "기출 풀이 앱",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5efe1",
+  "theme_color": "#0f3d3e",
+  "description": "공인중개사 기출문제를 PDF로 보며 답안을 체크하고 채점하는 설치형 웹앱",
+  "icons": [
+    {
+      "src": "./public/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
