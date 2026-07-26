@@ -28,7 +28,12 @@
 
         <nav class="nav">
           <a href="#solve">문제 풀기</a>
-          <a href="#library">자료실</a>
+          <a href="#library">연도별 기출</a>
+          <a
+            href="https://www.q-net.or.kr/cst003.do?id=cst00309&gSite=L&gId=08"
+            target="_blank"
+            rel="noreferrer"
+          >Q-Net 자료실</a>
           <a href="https://www.law.go.kr/" target="_blank" rel="noreferrer">국가법령정보센터</a>
         </nav>
       </header>
@@ -40,8 +45,8 @@
             <h1>기출문제를 보면서 바로 풀고, 저장하고, 채점하세요.</h1>
             <p class="hero-text">
               2021년 제32회 공인중개사 1차 1교시 B형을 PDF 그대로 보면서 답안을 입력할 수 있고,
-              공식 정답 기준으로 즉시 채점할 수 있습니다. 2024년 제35회 최종정답 PDF도 함께
-              자료실에 넣어 두었습니다.
+              공식 정답 기준으로 즉시 채점할 수 있습니다. Q-Net 공식 자료실의 2005년부터
+              2025년까지 문제지와 최종정답도 연도별로 찾아볼 수 있습니다.
             </p>
 
             <div class="hero-actions">
@@ -52,21 +57,21 @@
 
             <div class="hero-badges">
               <span>2021 제32회 1차 1교시 B형 채점 지원</span>
-              <span>2024 제35회 공식 정답 PDF 포함</span>
+              <span>2005-2025 Q-Net 공식 기출 연결</span>
               <span>진도 자동 저장</span>
             </div>
           </div>
 
           <aside class="hero-panel">
             <div class="metric-card">
-              <span class="metric-label">현재 지원 시험</span>
-              <strong class="metric-value">1개</strong>
-              <p>채점 가능한 세트: 2021년 제32회 1차 1교시 B형</p>
+              <span class="metric-label">연도별 기출</span>
+              <strong class="metric-value">22세트</strong>
+              <p>2005년 제15회 추가시험부터 2025년 제36회까지 정리했습니다.</p>
             </div>
             <div class="metric-card">
-              <span class="metric-label">자료 PDF</span>
-              <strong class="metric-value">3개</strong>
-              <p>문제지 1개, 정답표 2개를 앱 안에서 바로 열 수 있습니다.</p>
+              <span class="metric-label">즉시 채점</span>
+              <strong class="metric-value">80문항</strong>
+              <p>2021년 제32회 1차 1교시 B형은 앱에서 바로 풀고 채점할 수 있습니다.</p>
             </div>
             <div class="metric-card">
               <span class="metric-label">법령 바로가기</span>
@@ -136,45 +141,47 @@
         <section id="library" class="section">
           <div class="section-head">
             <div>
-              <p class="eyebrow">Library</p>
-              <h2>PDF 자료실</h2>
+              <p class="eyebrow">Official Archive</p>
+              <h2>연도별 Q-Net 기출문제</h2>
             </div>
-            <span class="chip">문제지/정답지 보관</span>
+            <span id="archiveCount" class="chip">22개 시험세트</span>
           </div>
 
-          <div class="library-grid">
-            <article class="panel library-card">
-              <div class="panel-head">
-                <h3>2021 문제지</h3>
-                <span class="chip">B형</span>
-              </div>
-              <p>2021년 제32회 공인중개사 자격시험 1차 1교시 B형 문제지입니다.</p>
-              <div class="card-actions">
-                <a class="primary-button" href="./public/pdfs/2021-question.pdf" target="_blank" rel="noreferrer">PDF 열기</a>
-              </div>
-            </article>
+          <div class="archive-toolbar panel">
+            <label class="archive-search">
+              <span>연도 또는 회차 검색</span>
+              <input
+                id="archiveSearch"
+                type="search"
+                inputmode="search"
+                placeholder="예: 2024, 35회"
+                autocomplete="off"
+              />
+            </label>
+            <div class="archive-quick-links">
+              <a
+                class="secondary-button"
+                href="https://www.q-net.or.kr/cst003.do?id=cst00309&gSite=L&gId=08"
+                target="_blank"
+                rel="noreferrer"
+              >Q-Net 기출문제 전체</a>
+              <a
+                class="secondary-button"
+                href="https://www.q-net.or.kr/cst003.do?id=cst00310&gSite=L&gId=08"
+                target="_blank"
+                rel="noreferrer"
+              >Q-Net 최종정답 전체</a>
+            </div>
+          </div>
 
-            <article class="panel library-card">
-              <div class="panel-head">
-                <h3>2021 공식 정답</h3>
-                <span class="chip">최종정답</span>
-              </div>
-              <p>2021년 제32회 공인중개사 자격시험 정답 PDF입니다. 1차 1교시 B형 채점 기준으로 사용합니다.</p>
-              <div class="card-actions">
-                <a class="primary-button" href="./public/pdfs/2021-answer.pdf" target="_blank" rel="noreferrer">PDF 열기</a>
-              </div>
-            </article>
+          <p class="archive-note">
+            문제지와 정답은 한국산업인력공단 Q-Net 원문으로 연결됩니다. 2021년 문제지와
+            2021·2024년 정답은 앱에도 보관되어 있어 바로 열 수 있습니다.
+          </p>
 
-            <article class="panel library-card">
-              <div class="panel-head">
-                <h3>2024 공식 정답</h3>
-                <span class="chip">제35회</span>
-              </div>
-              <p>2024년 제35회 공인중개사 자격시험 최종정답 PDF입니다. 참고 자료로 바로 열어볼 수 있습니다.</p>
-              <div class="card-actions">
-                <a class="primary-button" href="./public/pdfs/2024-answer.pdf" target="_blank" rel="noreferrer">PDF 열기</a>
-              </div>
-            </article>
+          <div id="archiveGrid" class="library-grid" aria-live="polite"></div>
+          <div id="archiveEmpty" class="panel empty-message" hidden>
+            검색 조건에 맞는 시험이 없습니다.
           </div>
         </section>
       </main>

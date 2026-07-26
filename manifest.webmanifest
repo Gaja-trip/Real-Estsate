@@ -1,7 +1,9 @@
 {
   "name": "공인중개사 기출 풀이 앱",
   "short_name": "기출 풀이 앱",
-  "start_url": "./index.html",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f5efe1",
   "theme_color": "#0f3d3e",

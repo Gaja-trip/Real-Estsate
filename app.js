@@ -37,6 +37,41 @@ const examData = {
   ],
 };
 
+const QNET_BASE_URL = "https://www.q-net.or.kr/cst003.do";
+
+const examArchive = [
+  { year: 2025, round: 36, questionId: 5247125, answerId: 5249925 },
+  { year: 2024, round: 35, questionId: 5214724, answerId: 5218527, localAnswer: "./public/pdfs/2024-answer.pdf" },
+  { year: 2023, round: 34, questionId: 5212459, answerId: 5212816 },
+  { year: 2022, round: 33, questionId: 5211107, answerId: 5211208 },
+  {
+    year: 2021,
+    round: 32,
+    questionId: 5209170,
+    answerId: 5209538,
+    localQuestion: "./public/pdfs/2021-question.pdf",
+    localAnswer: "./public/pdfs/2021-answer.pdf",
+    interactive: true,
+  },
+  { year: 2020, round: 31, questionId: 5207817, answerId: 5207915 },
+  { year: 2019, round: 30, questionId: 5206273, answerId: 5206494 },
+  { year: 2018, round: 29, questionId: 5204010, answerId: 5204546 },
+  { year: 2017, round: 28, questionId: 5202172, answerId: 5202400 },
+  { year: 2016, round: 27, questionId: 5198028, answerId: 5199003 },
+  { year: 2015, round: 26, questionId: 5153804, answerId: 5162623 },
+  { year: 2014, round: 25, questionId: 5112604, answerId: 5116202 },
+  { year: 2013, round: 24, questionId: 5081403, answerId: 5085400 },
+  { year: 2012, round: 23, questionId: 5057600, answerId: 5060264 },
+  { year: 2011, round: 22, questionId: 5043379, answerId: 5044801 },
+  { year: 2010, round: 21, questionId: 5026583, answerId: 5027388 },
+  { year: 2009, round: 20, questionId: 5013975, answerId: 5013976 },
+  { year: 2008, round: 19, questionId: 5007797, answerId: 5008471 },
+  { year: 2007, round: 18, questionId: 5007796, answerId: 5008470 },
+  { year: 2006, round: 17, questionId: 5007795, answerId: 5008469 },
+  { year: 2005, round: 16, questionId: 5007794, answerId: 5008468 },
+  { year: 2005, round: 15, questionId: 5007793, answerId: 5008467, extra: true },
+];
+
 const STORAGE_KEY = "real-estate-exam-progress-v1";
 
 const state = {
@@ -57,8 +92,84 @@ const elements = {
   progressCount: document.getElementById("progressCount"),
   resultSummary: document.getElementById("resultSummary"),
   resultDetails: document.getElementById("resultDetails"),
+  archiveSearch: document.getElementById("archiveSearch"),
+  archiveGrid: document.getElementById("archiveGrid"),
+  archiveCount: document.getElementById("archiveCount"),
+  archiveEmpty: document.getElementById("archiveEmpty"),
   tabButtons: [...document.querySelectorAll(".tab-button")],
 };
+
+function qnetArticleUrl(articleId, menuType) {
+  const params = new URLSearchParams({
+    artlSeq: String(articleId),
+    boardId: "Q004",
+    gId: "08",
+    gSite: "L",
+    id: "cst00302",
+    menuType,
+  });
+  return `${QNET_BASE_URL}?${params.toString()}`;
+}
+
+function renderArchive() {
+  const query = elements.archiveSearch.value.trim().toLowerCase().replace(/\s+/g, "");
+  const filtered = examArchive.filter((exam) => {
+    const extraLabel = exam.extra ? "추가시험" : "";
+    const haystack = `${exam.year}년 제${exam.round}회 ${exam.round}회 ${extraLabel}`
+      .toLowerCase()
+      .replace(/\s+/g, "");
+    return haystack.includes(query);
+  });
+
+  elements.archiveCount.textContent = `${filtered.length}개 시험세트`;
+  elements.archiveEmpty.hidden = filtered.length > 0;
+  elements.archiveGrid.innerHTML = filtered
+    .map((exam) => {
+      const title = `${exam.year}년 제${exam.round}회${exam.extra ? " 추가시험" : ""}`;
+      const localLinks = [
+        exam.interactive
+          ? `<a class="secondary-button" href="#solve">앱에서 풀기</a>`
+          : "",
+        exam.localQuestion
+          ? `<a class="secondary-button" href="${exam.localQuestion}" target="_blank" rel="noreferrer">보관 문제 PDF</a>`
+          : "",
+        exam.localAnswer
+          ? `<a class="secondary-button" href="${exam.localAnswer}" target="_blank" rel="noreferrer">보관 정답 PDF</a>`
+          : "",
+      ]
+        .filter(Boolean)
+        .join("");
+
+      return `
+        <article class="panel library-card">
+          <div class="panel-head">
+            <div>
+              <span class="archive-year">${exam.year}</span>
+              <h3>${title}</h3>
+            </div>
+            <span class="chip">${exam.interactive ? "즉시 채점" : "Q-Net 원문"}</span>
+          </div>
+          <p>공인중개사 자격시험 문제지와 최종정답을 공식 자료실에서 확인할 수 있습니다.</p>
+          <div class="card-actions">
+            <a
+              class="primary-button"
+              href="${qnetArticleUrl(exam.questionId, "cst00309")}"
+              target="_blank"
+              rel="noreferrer"
+            >공식 문제지</a>
+            <a
+              class="ghost-button"
+              href="${qnetArticleUrl(exam.answerId, "cst00310")}"
+              target="_blank"
+              rel="noreferrer"
+            >공식 최종정답</a>
+            ${localLinks}
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
 
 function loadSavedAnswers() {
   try {
@@ -316,6 +427,8 @@ elements.resetProgressButton.addEventListener("click", () => {
   renderAll();
 });
 
+elements.archiveSearch.addEventListener("input", renderArchive);
+
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
   state.deferredPrompt = event;
@@ -341,4 +454,5 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+renderArchive();
 renderAll();

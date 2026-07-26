@@ -480,8 +480,71 @@ h2 {
   gap: 18px;
 }
 
+.archive-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+
+.archive-search {
+  display: grid;
+  gap: 8px;
+  width: min(100%, 460px);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.archive-search input {
+  width: 100%;
+  padding: 13px 15px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--ink);
+  font: inherit;
+}
+
+.archive-search input:focus {
+  border-color: rgba(15, 61, 62, 0.46);
+  box-shadow: 0 0 0 4px rgba(15, 61, 62, 0.09);
+}
+
+.archive-quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.archive-note {
+  margin: 0 0 14px;
+  line-height: 1.65;
+}
+
+.archive-year {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.library-card {
+  display: flex;
+  min-height: 245px;
+  flex-direction: column;
+}
+
 .library-card p {
   line-height: 1.65;
+}
+
+.library-card .card-actions {
+  margin-top: auto;
 }
 
 .mini-link {
@@ -491,9 +554,12 @@ h2 {
 
 @media (max-width: 1280px) {
   .hero,
-  .solve-layout,
-  .library-grid {
+  .solve-layout {
     grid-template-columns: 1fr;
+  }
+
+  .library-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -510,9 +576,14 @@ h2 {
 
   .topbar,
   .section-head,
-  .panel-head {
+  .panel-head,
+  .archive-toolbar {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .library-grid {
+    grid-template-columns: 1fr;
   }
 
   .question-grid {
