@@ -49,7 +49,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -60,7 +61,8 @@ a {
 
 button:focus-visible,
 a:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible {
   outline: 3px solid rgba(190, 108, 53, 0.38);
   outline-offset: 3px;
 }
@@ -408,6 +410,42 @@ button:disabled {
   margin: 8px 0 0;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.exam-head-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.exam-picker {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.exam-picker select {
+  min-width: 230px;
+  min-height: 42px;
+  padding: 8px 38px 8px 13px;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.exam-picker select:focus {
+  border-color: rgba(18, 61, 58, 0.45);
+  box-shadow: 0 0 0 4px rgba(18, 61, 58, 0.08);
+}
+
+.exam-head-actions .status-row {
+  padding-bottom: 6px;
 }
 
 .panel {
@@ -1100,6 +1138,11 @@ button:disabled {
     justify-content: flex-start;
   }
 
+  .exam-head-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
   .cbt-layout {
     grid-template-columns: 1fr;
   }
@@ -1160,6 +1203,12 @@ button:disabled {
 
   .hero-actions > * {
     flex: 1 1 auto;
+  }
+
+  .exam-head-actions,
+  .exam-picker,
+  .exam-picker select {
+    width: 100%;
   }
 
   .hero-metrics {

@@ -1,14 +1,18 @@
 const CACHE_PREFIX = "real-estate-civil-law-cbt-";
 const LEGACY_CACHE_PREFIX = "real-estate-exam-app-";
-const CACHE_NAME = `${CACHE_PREFIX}v3`;
+const CACHE_NAME = `${CACHE_PREFIX}v4`;
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=3",
-  "./app.js?v=3",
+  "./styles.css?v=4",
+  "./app.js?v=4",
   "./manifest.webmanifest",
   "./public/icon.svg",
-  "./public/data/civil-law-2021.js?v=3",
+  "./public/data/civil-law-2021.js?v=4",
+  "./public/data/civil-law-2022.js?v=4",
+  "./public/data/civil-law-2023.js?v=4",
+  "./public/data/civil-law-2024.js?v=4",
+  "./public/data/civil-law-2025.js?v=4",
   "./public/pdfs/2021-question.pdf",
   "./public/pdfs/2021-answer.pdf",
   "./public/pdfs/2024-answer.pdf",

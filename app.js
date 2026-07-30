@@ -1,12 +1,23 @@
-const examData = window.CIVIL_LAW_2021;
+const EXAM_GLOBALS = [
+  "CIVIL_LAW_2025",
+  "CIVIL_LAW_2024",
+  "CIVIL_LAW_2023",
+  "CIVIL_LAW_2022",
+  "CIVIL_LAW_2021",
+];
+const exams = EXAM_GLOBALS.map((name) => window[name])
+  .filter((exam) => exam && Array.isArray(exam.questions))
+  .sort((a, b) => b.year - a.year);
 
-if (!examData || !Array.isArray(examData.questions)) {
+if (exams.length === 0) {
   throw new Error("민법 CBT 문제 데이터를 불러오지 못했습니다.");
 }
 
 const QNET_BASE_URL = "https://www.q-net.or.kr/cst003.do";
-const STORAGE_KEY = `real-estate-cbt-progress-${examData.id}-v1`;
+const ACTIVE_EXAM_KEY = "real-estate-cbt-active-exam-v1";
 const CHOICE_LABELS = ["1", "2", "3", "4", "5"];
+const examById = new Map(exams.map((exam) => [exam.id, exam]));
+const examByYear = new Map(exams.map((exam) => [exam.year, exam]));
 
 const examArchive = [
   { year: 2025, round: 36, questionId: 5247125, answerId: 5249925 },
@@ -20,7 +31,6 @@ const examArchive = [
     answerId: 5209538,
     localQuestion: "./public/pdfs/2021-question.pdf",
     localAnswer: "./public/pdfs/2021-answer.pdf",
-    interactive: true,
   },
   { year: 2020, round: 31, questionId: 5207817, answerId: 5207915 },
   { year: 2019, round: 30, questionId: 5206273, answerId: 5206494 },
@@ -45,6 +55,9 @@ const elements = {
   startButton: document.getElementById("startButton"),
   resetProgressButton: document.getElementById("resetProgressButton"),
   installButton: document.getElementById("installButton"),
+  examSelect: document.getElementById("examSelect"),
+  examTitle: document.getElementById("examTitle"),
+  examDescription: document.getElementById("examDescription"),
   saveStatus: document.getElementById("saveStatus"),
   elapsedTime: document.getElementById("elapsedTime"),
   questionPosition: document.getElementById("questionPosition"),
@@ -78,36 +91,25 @@ const elements = {
   archiveGrid: document.getElementById("archiveGrid"),
   archiveCount: document.getElementById("archiveCount"),
   archiveEmpty: document.getElementById("archiveEmpty"),
+  footerSource: document.getElementById("footerSource"),
+  footerQuestionLink: document.getElementById("footerQuestionLink"),
 };
 
-const storedProgress = loadProgress();
-const state = {
-  deferredPrompt: null,
-  currentIndex: clampIndex(storedProgress.currentIndex),
-  answers: normalizeAnswers(storedProgress.answers),
-  flagged: new Set(
-    Array.isArray(storedProgress.flagged)
-      ? storedProgress.flagged.map(Number).filter((number) => findQuestion(number))
-      : []
-  ),
-  submitted: Boolean(storedProgress.submitted),
-  started: Boolean(
-    storedProgress.started ||
-      storedProgress.submitted ||
-      Number(storedProgress.elapsedSeconds) > 0 ||
-      Object.keys(storedProgress.answers || {}).length > 0
-  ),
-  elapsedSeconds: Number.isInteger(storedProgress.elapsedSeconds)
-    ? Math.max(0, storedProgress.elapsedSeconds)
-    : 0,
-  runningSince: null,
-  lastSavedElapsed: Number.isInteger(storedProgress.elapsedSeconds)
-    ? Math.max(0, storedProgress.elapsedSeconds)
-    : 0,
-};
+function readActiveExam() {
+  try {
+    return localStorage.getItem(ACTIVE_EXAM_KEY);
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
 
-if (state.started && !state.submitted) {
-  state.runningSince = Date.now();
+let examData = examById.get(readActiveExam()) || exams[0];
+let state = createState(loadProgress());
+let deferredPrompt = null;
+
+function storageKey() {
+  return `real-estate-cbt-progress-${examData.id}-v1`;
 }
 
 function clampIndex(value) {
@@ -144,7 +146,7 @@ function normalizeAnswers(value) {
 
 function loadProgress() {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    const saved = JSON.parse(localStorage.getItem(storageKey()) || "{}");
     return saved && typeof saved === "object" ? saved : {};
   } catch (error) {
     console.error(error);
@@ -152,7 +154,40 @@ function loadProgress() {
   }
 }
 
+function createState(progress) {
+  const elapsedSeconds = Number.isInteger(progress.elapsedSeconds)
+    ? Math.max(0, progress.elapsedSeconds)
+    : 0;
+  const answers = normalizeAnswers(progress.answers);
+  const submitted = Boolean(progress.submitted);
+  const started = Boolean(
+    progress.started ||
+      submitted ||
+      elapsedSeconds > 0 ||
+      Object.keys(answers).length > 0
+  );
+
+  return {
+    currentIndex: clampIndex(progress.currentIndex),
+    answers,
+    flagged: new Set(
+      Array.isArray(progress.flagged)
+        ? progress.flagged.map(Number).filter((number) => findQuestion(number))
+        : []
+    ),
+    submitted,
+    started,
+    elapsedSeconds,
+    runningSince: started && !submitted ? Date.now() : null,
+    lastSavedElapsed: elapsedSeconds,
+  };
+}
+
 function saveProgress(message = "진도 자동 저장됨") {
+  if (!state) {
+    return;
+  }
+
   const payload = {
     currentIndex: state.currentIndex,
     answers: state.answers,
@@ -162,9 +197,16 @@ function saveProgress(message = "진도 자동 저장됨") {
     elapsedSeconds: getElapsedSeconds(),
   };
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  state.lastSavedElapsed = payload.elapsedSeconds;
-  elements.saveStatus.textContent = message;
+  try {
+    localStorage.setItem(storageKey(), JSON.stringify(payload));
+    state.lastSavedElapsed = payload.elapsedSeconds;
+    if (message) {
+      elements.saveStatus.textContent = message;
+    }
+  } catch (error) {
+    console.error(error);
+    elements.saveStatus.textContent = "진도 저장을 사용할 수 없음";
+  }
 }
 
 function currentQuestion() {
@@ -212,6 +254,47 @@ function ensureTimerStarted() {
   }
 }
 
+function setLoadedStatus() {
+  elements.saveStatus.textContent =
+    Object.keys(state.answers).length > 0 || getElapsedSeconds() > 0
+      ? state.submitted
+        ? "채점 결과 불러옴"
+        : "저장된 진도 불러옴"
+      : "진도 자동 저장";
+}
+
+function qnetArticleUrl(articleId, menuType) {
+  const params = new URLSearchParams({
+    artlSeq: String(articleId),
+    boardId: "Q004",
+    gId: "08",
+    gSite: "L",
+    id: "cst00302",
+    menuType,
+  });
+  return `${QNET_BASE_URL}?${params.toString()}`;
+}
+
+function renderExamMetadata() {
+  const archive = examArchive.find(
+    (item) => item.year === examData.year && item.round === examData.round && !item.extra
+  );
+  const questionUrl =
+    archive?.localQuestion ||
+    (archive ? qnetArticleUrl(archive.questionId, "cst00309") : examData.source?.question);
+
+  elements.examSelect.value = examData.id;
+  elements.examTitle.textContent = `${examData.year}년 제${examData.round}회 민법 기출`;
+  elements.examDescription.textContent =
+    `${examData.subject} · 1차 1교시 ${examData.type}`;
+  elements.resultTitle.textContent = `${examData.year}년 채점 결과`;
+  elements.footerSource.textContent =
+    `문항 및 정답 출처: 한국산업인력공단 Q-Net · ${examData.year}년 제${examData.round}회 공인중개사 자격시험 ${examData.type}`;
+  elements.footerQuestionLink.href = questionUrl || "#library";
+  elements.footerQuestionLink.textContent = `${examData.year}년 공식 문제지 대조`;
+  document.title = `${examData.year} 공인중개사 민법 기출 CBT`;
+}
+
 function renderTimer() {
   elements.elapsedTime.textContent = formatDuration(getElapsedSeconds());
 }
@@ -222,7 +305,7 @@ function renderProgress() {
   const unanswered = total - answered;
   const percentage = (answered / total) * 100;
 
-  elements.questionPosition.textContent = `민법 ${state.currentIndex + 1} / ${total}`;
+  elements.questionPosition.textContent = `${examData.year} 민법 ${state.currentIndex + 1} / ${total}`;
   elements.progressCount.textContent = `${answered}문항 응답`;
   elements.progressBar.style.width = `${percentage}%`;
   elements.progressTrack.setAttribute("aria-valuemax", String(total));
@@ -237,10 +320,10 @@ function renderProgress() {
   elements.gradeButton.disabled = state.submitted;
   elements.resultNavLink.setAttribute("href", state.submitted ? "#results" : "#cbt");
   elements.startButton.textContent = state.submitted
-    ? "채점 결과 보기"
+    ? `${examData.year}년 채점 결과 보기`
     : answered > 0 || getElapsedSeconds() > 0
-      ? "이어서 풀기"
-      : "민법 CBT 시작";
+      ? `${examData.year}년 이어서 풀기`
+      : `${examData.year}년 민법 CBT 시작`;
 }
 
 function renderQuestion() {
@@ -249,7 +332,7 @@ function renderQuestion() {
   const isFlagged = state.flagged.has(question.number);
 
   elements.questionTopic.textContent = question.topic;
-  elements.sourceQuestion.textContent = `원문 ${question.number}번`;
+  elements.sourceQuestion.textContent = `${examData.type} 원문 ${question.number}번`;
   elements.questionPrompt.textContent = question.prompt;
   elements.flagButton.setAttribute("aria-pressed", String(isFlagged));
   elements.flagButton.innerHTML = `<span aria-hidden="true">${isFlagged ? "◆" : "◇"}</span>${isFlagged ? "보류됨" : "보류"}`;
@@ -293,7 +376,6 @@ function renderQuestion() {
   });
 
   renderFeedback(question, selected);
-
   elements.previousButton.disabled = state.currentIndex === 0;
   const isLastQuestion = state.currentIndex === examData.questions.length - 1;
   elements.nextButton.textContent =
@@ -310,7 +392,6 @@ function renderFeedback(question, selected) {
   }
 
   elements.answerFeedback.hidden = false;
-
   if (!selected) {
     elements.answerFeedback.className = "answer-feedback unanswered";
     elements.answerFeedback.textContent = `미응답 · 공식 정답: ${answerLabel(question.answers)}`;
@@ -327,7 +408,8 @@ function renderFeedback(question, selected) {
   }
 
   elements.answerFeedback.className = "answer-feedback wrong";
-  elements.answerFeedback.textContent = `오답입니다 · 선택: ${selected}번 / 공식 정답: ${answerLabel(question.answers)}`;
+  elements.answerFeedback.textContent =
+    `오답입니다 · 선택: ${selected}번 / 공식 정답: ${answerLabel(question.answers)}`;
 }
 
 function renderNavigator() {
@@ -386,6 +468,7 @@ function renderResults() {
   const unanswered = total - answered;
   const convertedScore = correct * 2.5;
 
+  elements.resultTitle.textContent = `${examData.year}년 채점 결과`;
   elements.resultSummary.innerHTML = `
     <div class="score-card primary">
       <span>민법 환산점수</span>
@@ -415,7 +498,6 @@ function renderResults() {
 
 function renderTopicResults() {
   const topics = new Map();
-
   examData.questions.forEach((question) => {
     const label = broadTopic(question.topic);
     const current = topics.get(label) || { correct: 0, total: 0 };
@@ -565,34 +647,45 @@ function submitExam() {
 }
 
 function resetExam() {
-  if (!window.confirm("저장된 답안과 풀이 시간을 모두 지우고 새로 풀까요?")) {
+  if (!window.confirm(`${examData.year}년 저장 답안과 풀이 시간을 모두 지우고 새로 풀까요?`)) {
     return;
   }
 
-  state.currentIndex = 0;
-  state.answers = {};
-  state.flagged = new Set();
-  state.submitted = false;
-  state.started = false;
-  state.elapsedSeconds = 0;
-  state.runningSince = null;
-  state.lastSavedElapsed = 0;
-  localStorage.removeItem(STORAGE_KEY);
+  state = createState({});
+  try {
+    localStorage.removeItem(storageKey());
+  } catch (error) {
+    console.error(error);
+  }
   elements.saveStatus.textContent = "새 풀이를 시작합니다";
   renderAll();
   document.getElementById("cbt").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function qnetArticleUrl(articleId, menuType) {
-  const params = new URLSearchParams({
-    artlSeq: String(articleId),
-    boardId: "Q004",
-    gId: "08",
-    gSite: "L",
-    id: "cst00302",
-    menuType,
-  });
-  return `${QNET_BASE_URL}?${params.toString()}`;
+function switchExam(examId, scrollToExam = true) {
+  const nextExam = examById.get(examId);
+  if (!nextExam) {
+    return;
+  }
+
+  if (nextExam.id !== examData.id) {
+    saveProgress("");
+    examData = nextExam;
+    state = createState(loadProgress());
+    try {
+      localStorage.setItem(ACTIVE_EXAM_KEY, examData.id);
+    } catch (error) {
+      console.error(error);
+    }
+    renderExamMetadata();
+    setLoadedStatus();
+    renderAll();
+  }
+
+  if (scrollToExam) {
+    document.getElementById("cbt").scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => elements.questionPrompt.focus({ preventScroll: true }), 250);
+  }
 }
 
 function renderArchive() {
@@ -609,9 +702,10 @@ function renderArchive() {
   elements.archiveEmpty.hidden = filtered.length > 0;
   elements.archiveGrid.innerHTML = filtered
     .map((exam) => {
+      const interactiveExam = !exam.extra ? examByYear.get(exam.year) : null;
       const title = `${exam.year}년 제${exam.round}회${exam.extra ? " 추가시험" : ""}`;
-      const cbtLink = exam.interactive
-        ? `<a class="primary-button" href="#cbt">민법 CBT 풀기</a>`
+      const cbtButton = interactiveExam
+        ? `<button class="primary-button archive-cbt-button" type="button" data-exam-id="${interactiveExam.id}">민법 CBT 풀기</button>`
         : "";
       const localQuestion = exam.localQuestion
         ? `<a class="ghost-button" href="${exam.localQuestion}" target="_blank" rel="noreferrer">원문 대조</a>`
@@ -624,17 +718,17 @@ function renderArchive() {
               <span class="archive-year">${exam.year}</span>
               <h3>${title}</h3>
             </div>
-            <span class="chip">${exam.interactive ? "CBT 지원" : "원문 자료"}</span>
+            <span class="chip">${interactiveExam ? "CBT 지원" : "원문 자료"}</span>
           </div>
           <p>${
-            exam.interactive
+            interactiveExam
               ? "민법 40문항을 PDF 없이 앱에서 바로 풀고 채점할 수 있습니다."
               : "Q-Net 공식 문제지와 최종정답으로 연결됩니다."
           }</p>
           <div class="card-actions">
-            ${cbtLink}
+            ${cbtButton}
             <a
-              class="${exam.interactive ? "secondary-button" : "primary-button"}"
+              class="${interactiveExam ? "secondary-button" : "primary-button"}"
               href="${qnetArticleUrl(exam.questionId, "cst00309")}"
               target="_blank"
               rel="noreferrer"
@@ -653,6 +747,14 @@ function renderArchive() {
     .join("");
 }
 
+elements.examSelect.innerHTML = exams
+  .map(
+    (exam) =>
+      `<option value="${exam.id}">${exam.year}년 · 제${exam.round}회 · ${exam.type}</option>`
+  )
+  .join("");
+
+elements.examSelect.addEventListener("change", (event) => switchExam(event.target.value, false));
 elements.startButton.addEventListener("click", () => {
   if (state.submitted) {
     elements.results.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -664,7 +766,6 @@ elements.startButton.addEventListener("click", () => {
   document.getElementById("cbt").scrollIntoView({ behavior: "smooth", block: "start" });
   window.setTimeout(() => elements.questionPrompt.focus({ preventScroll: true }), 250);
 });
-
 elements.resetProgressButton.addEventListener("click", resetExam);
 elements.retakeButton.addEventListener("click", resetExam);
 elements.flagButton.addEventListener("click", toggleFlag);
@@ -686,6 +787,12 @@ elements.nextButton.addEventListener("click", () => {
 });
 elements.gradeButton.addEventListener("click", submitExam);
 elements.archiveSearch.addEventListener("input", renderArchive);
+elements.archiveGrid.addEventListener("click", (event) => {
+  const button = event.target.closest(".archive-cbt-button");
+  if (button) {
+    switchExam(button.dataset.examId);
+  }
+});
 elements.resultNavLink.addEventListener("click", (event) => {
   event.preventDefault();
   const target = state.submitted ? elements.results : document.getElementById("cbt");
@@ -718,21 +825,18 @@ document.addEventListener("keydown", (event) => {
     selectAnswer(Number(event.key));
     return;
   }
-
   if (event.key === "ArrowLeft" && state.currentIndex > 0) {
     event.preventDefault();
     navigateTo(state.currentIndex - 1);
     elements.questionPrompt.focus({ preventScroll: true });
     return;
   }
-
   if (event.key === "ArrowRight" && state.currentIndex < examData.questions.length - 1) {
     event.preventDefault();
     navigateTo(state.currentIndex + 1);
     elements.questionPrompt.focus({ preventScroll: true });
     return;
   }
-
   if (!state.submitted && event.key.toLowerCase() === "f") {
     event.preventDefault();
     toggleFlag();
@@ -742,18 +846,18 @@ document.addEventListener("keydown", (event) => {
 
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
-  state.deferredPrompt = event;
+  deferredPrompt = event;
 });
 
 elements.installButton.addEventListener("click", async () => {
-  if (!state.deferredPrompt) {
+  if (!deferredPrompt) {
     window.alert("브라우저 주소창이나 메뉴의 '앱 설치' 기능을 이용해 주세요.");
     return;
   }
 
-  state.deferredPrompt.prompt();
-  await state.deferredPrompt.userChoice;
-  state.deferredPrompt = null;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
 });
 
 window.setInterval(() => {
@@ -767,7 +871,7 @@ window.setInterval(() => {
   }
 }, 1000);
 
-window.addEventListener("pagehide", () => saveProgress());
+window.addEventListener("pagehide", () => saveProgress(""));
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -777,12 +881,7 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-elements.saveStatus.textContent =
-  Object.keys(state.answers).length > 0 || getElapsedSeconds() > 0
-    ? state.submitted
-      ? "채점 결과 불러옴"
-      : "저장된 진도 불러옴"
-    : "진도 자동 저장";
-
+renderExamMetadata();
+setLoadedStatus();
 renderArchive();
 renderAll();

@@ -6,12 +6,12 @@
     <title>공인중개사 민법 기출 CBT</title>
     <meta
       name="description"
-      content="2021년 제32회 공인중개사 민법 및 민사특별법 40문항을 한 문제씩 풀고 바로 채점하는 CBT 학습 앱"
+      content="2021년부터 2025년까지 공인중개사 민법 및 민사특별법 200문항을 연도별로 풀고 바로 채점하는 CBT 학습 앱"
     />
     <meta name="theme-color" content="#123d3a" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" type="image/svg+xml" href="./public/icon.svg" />
-    <link rel="stylesheet" href="./styles.css?v=3" />
+    <link rel="stylesheet" href="./styles.css?v=4" />
   </head>
   <body>
     <div class="page-glow glow-top"></div>
@@ -42,11 +42,11 @@
       <main id="home">
         <section class="hero" aria-labelledby="heroTitle">
           <div class="hero-copy">
-            <p class="eyebrow">2021 · 제32회 · 1차 1교시 B형</p>
+            <p class="eyebrow">2021–2025 · 공식 기출 5개년</p>
             <h1 id="heroTitle">PDF를 넘기지 않고,<br />민법 기출을 CBT로 풉니다.</h1>
             <p class="hero-text">
-              문제와 선택지를 한 화면에서 읽고 답을 고르세요. 40문항 이동, 보류 표시,
-              자동 저장, 제출 채점과 오답 검토까지 실제 시험처럼 이어집니다.
+              2021년부터 2025년까지 민법 200문항을 연도별로 선택해 푸세요.
+              문제 이동, 보류 표시, 자동 저장, 제출 채점과 오답 검토까지 실제 시험처럼 이어집니다.
             </p>
 
             <div class="hero-actions">
@@ -56,32 +56,32 @@
             </div>
 
             <div class="hero-badges" aria-label="주요 기능">
-              <span>공식 기출 40문항</span>
-              <span>진도 자동 저장</span>
+              <span>공식 기출 200문항</span>
+              <span>연도별 진도 저장</span>
               <span>키보드 1~5 선택</span>
             </div>
           </div>
 
           <aside class="hero-summary" aria-label="시험 정보">
             <div class="hero-summary-head">
-              <span>첫 번째 CBT 세트</span>
-              <strong>민법 및 민사특별법</strong>
+              <span>민법 CBT 라이브러리</span>
+              <strong>2021년–2025년 전 문항</strong>
             </div>
             <div class="hero-metrics">
               <div>
-                <strong>40</strong>
-                <span>문항</span>
+                <strong>5</strong>
+                <span>개년</span>
               </div>
               <div>
-                <strong>50</strong>
-                <span>권장 분</span>
+                <strong>200</strong>
+                <span>문항</span>
               </div>
               <div>
                 <strong>5</strong>
                 <span>지선다</span>
               </div>
             </div>
-            <p>2021년 제32회 B형 원문과 공식 최종정답을 기준으로 정리했습니다.</p>
+            <p>각 연도 Q-Net 공식 문제지와 최종정답을 기준으로 문항별 구조화했습니다.</p>
           </aside>
         </section>
 
@@ -89,12 +89,18 @@
           <div class="section-head exam-section-head">
             <div>
               <p class="eyebrow">Civil Law CBT</p>
-              <h2 id="examTitle">2021년 제32회 민법 기출</h2>
-              <p class="section-description">민법 및 민사특별법 중 부동산 중개에 관련되는 규정</p>
+              <h2 id="examTitle">민법 기출 불러오는 중</h2>
+              <p id="examDescription" class="section-description">민법 및 민사특별법 중 부동산 중개에 관련되는 규정</p>
             </div>
-            <div class="status-row">
-              <span id="saveStatus" class="chip">진도 불러오는 중</span>
-              <span id="elapsedTime" class="chip accent-chip" aria-label="경과 시간">00:00</span>
+            <div class="exam-head-actions">
+              <label class="exam-picker">
+                <span>풀 시험 선택</span>
+                <select id="examSelect" aria-label="민법 기출 연도 선택"></select>
+              </label>
+              <div class="status-row">
+                <span id="saveStatus" class="chip">진도 불러오는 중</span>
+                <span id="elapsedTime" class="chip accent-chip" aria-label="경과 시간">00:00</span>
+              </div>
             </div>
           </div>
 
@@ -260,8 +266,8 @@
           </div>
 
           <p class="archive-note">
-            2021년 민법은 위 CBT에서 바로 풀 수 있습니다. 나머지 연도는 자료 출처 확인용
-            Q-Net 원문으로 연결되며, 이후 CBT 세트로 순차 정리할 수 있습니다.
+            2021년부터 2025년까지 민법은 위 CBT에서 바로 풀 수 있습니다.
+            모든 연도의 공식 문제지와 최종정답도 Q-Net 원문으로 대조할 수 있습니다.
           </p>
 
           <div id="archiveGrid" class="library-grid" aria-live="polite"></div>
@@ -272,12 +278,16 @@
       </main>
 
       <footer class="footer">
-        <p>문항 및 정답 출처: 한국산업인력공단 Q-Net · 2021년 제32회 공인중개사 자격시험</p>
-        <a href="./public/pdfs/2021-question.pdf" target="_blank" rel="noreferrer">원문 대조용 문제지</a>
+        <p id="footerSource">문항 및 정답 출처: 한국산업인력공단 Q-Net</p>
+        <a id="footerQuestionLink" href="#library" target="_blank" rel="noreferrer">공식 문제지 대조</a>
       </footer>
     </div>
 
-    <script src="./public/data/civil-law-2021.js?v=3"></script>
-    <script src="./app.js?v=3"></script>
+    <script src="./public/data/civil-law-2021.js?v=4"></script>
+    <script src="./public/data/civil-law-2022.js?v=4"></script>
+    <script src="./public/data/civil-law-2023.js?v=4"></script>
+    <script src="./public/data/civil-law-2024.js?v=4"></script>
+    <script src="./public/data/civil-law-2025.js?v=4"></script>
+    <script src="./app.js?v=4"></script>
   </body>
 </html>
