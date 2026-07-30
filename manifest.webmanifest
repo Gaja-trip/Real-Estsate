@@ -7,7 +7,7 @@
   "display": "standalone",
   "background_color": "#f2eee4",
   "theme_color": "#123d3a",
-  "description": "2021년부터 2025년까지 공인중개사 민법 기출문제를 연도별로 풀고 채점하는 설치형 CBT 앱",
+  "description": "2005년 추가시험부터 2025년까지 공인중개사 민법 기출 22회분 880문항을 풀고 채점하는 설치형 CBT 앱",
   "icons": [
     {
       "src": "./public/icon.svg",

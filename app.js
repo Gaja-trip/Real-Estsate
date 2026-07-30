@@ -4,10 +4,27 @@ const EXAM_GLOBALS = [
   "CIVIL_LAW_2023",
   "CIVIL_LAW_2022",
   "CIVIL_LAW_2021",
+  "CIVIL_LAW_2020",
+  "CIVIL_LAW_2019",
+  "CIVIL_LAW_2018",
+  "CIVIL_LAW_2017",
+  "CIVIL_LAW_2016",
+  "CIVIL_LAW_2015",
+  "CIVIL_LAW_2014",
+  "CIVIL_LAW_2013",
+  "CIVIL_LAW_2012",
+  "CIVIL_LAW_2011",
+  "CIVIL_LAW_2010",
+  "CIVIL_LAW_2009",
+  "CIVIL_LAW_2008",
+  "CIVIL_LAW_2007",
+  "CIVIL_LAW_2006",
+  "CIVIL_LAW_2005",
+  "CIVIL_LAW_2005_EXTRA",
 ];
 const exams = EXAM_GLOBALS.map((name) => window[name])
   .filter((exam) => exam && Array.isArray(exam.questions))
-  .sort((a, b) => b.year - a.year);
+  .sort((a, b) => b.year - a.year || b.round - a.round);
 
 if (exams.length === 0) {
   throw new Error("민법 CBT 문제 데이터를 불러오지 못했습니다.");
@@ -17,7 +34,9 @@ const QNET_BASE_URL = "https://www.q-net.or.kr/cst003.do";
 const ACTIVE_EXAM_KEY = "real-estate-cbt-active-exam-v1";
 const CHOICE_LABELS = ["1", "2", "3", "4", "5"];
 const examById = new Map(exams.map((exam) => [exam.id, exam]));
-const examByYear = new Map(exams.map((exam) => [exam.year, exam]));
+const examByRound = new Map(
+  exams.map((exam) => [`${exam.year}-${exam.round}`, exam])
+);
 
 const examArchive = [
   { year: 2025, round: 36, questionId: 5247125, answerId: 5249925 },
@@ -275,24 +294,29 @@ function qnetArticleUrl(articleId, menuType) {
   return `${QNET_BASE_URL}?${params.toString()}`;
 }
 
+function examRoundLabel(exam) {
+  return `${exam.year}년 제${exam.round}회${exam.extra ? " 추가시험" : ""}`;
+}
+
 function renderExamMetadata() {
   const archive = examArchive.find(
-    (item) => item.year === examData.year && item.round === examData.round && !item.extra
+    (item) => item.year === examData.year && item.round === examData.round
   );
   const questionUrl =
     archive?.localQuestion ||
     (archive ? qnetArticleUrl(archive.questionId, "cst00309") : examData.source?.question);
+  const label = examRoundLabel(examData);
 
   elements.examSelect.value = examData.id;
-  elements.examTitle.textContent = `${examData.year}년 제${examData.round}회 민법 기출`;
+  elements.examTitle.textContent = `${label} 민법 기출`;
   elements.examDescription.textContent =
     `${examData.subject} · 1차 1교시 ${examData.type}`;
-  elements.resultTitle.textContent = `${examData.year}년 채점 결과`;
+  elements.resultTitle.textContent = `${label} 채점 결과`;
   elements.footerSource.textContent =
-    `문항 및 정답 출처: 한국산업인력공단 Q-Net · ${examData.year}년 제${examData.round}회 공인중개사 자격시험 ${examData.type}`;
+    `문항 및 정답 출처: 한국산업인력공단 Q-Net · ${label} 공인중개사 자격시험 ${examData.type}`;
   elements.footerQuestionLink.href = questionUrl || "#library";
-  elements.footerQuestionLink.textContent = `${examData.year}년 공식 문제지 대조`;
-  document.title = `${examData.year} 공인중개사 민법 기출 CBT`;
+  elements.footerQuestionLink.textContent = `${label} 공식 문제지 대조`;
+  document.title = `${label} 공인중개사 민법 기출 CBT`;
 }
 
 function renderTimer() {
@@ -305,7 +329,8 @@ function renderProgress() {
   const unanswered = total - answered;
   const percentage = (answered / total) * 100;
 
-  elements.questionPosition.textContent = `${examData.year} 민법 ${state.currentIndex + 1} / ${total}`;
+  elements.questionPosition.textContent =
+    `${examRoundLabel(examData)} 민법 ${state.currentIndex + 1} / ${total}`;
   elements.progressCount.textContent = `${answered}문항 응답`;
   elements.progressBar.style.width = `${percentage}%`;
   elements.progressTrack.setAttribute("aria-valuemax", String(total));
@@ -320,10 +345,10 @@ function renderProgress() {
   elements.gradeButton.disabled = state.submitted;
   elements.resultNavLink.setAttribute("href", state.submitted ? "#results" : "#cbt");
   elements.startButton.textContent = state.submitted
-    ? `${examData.year}년 채점 결과 보기`
+    ? `${examRoundLabel(examData)} 채점 결과 보기`
     : answered > 0 || getElapsedSeconds() > 0
-      ? `${examData.year}년 이어서 풀기`
-      : `${examData.year}년 민법 CBT 시작`;
+      ? `${examRoundLabel(examData)} 이어서 풀기`
+      : `${examRoundLabel(examData)} 민법 CBT 시작`;
 }
 
 function renderQuestion() {
@@ -468,7 +493,7 @@ function renderResults() {
   const unanswered = total - answered;
   const convertedScore = correct * 2.5;
 
-  elements.resultTitle.textContent = `${examData.year}년 채점 결과`;
+  elements.resultTitle.textContent = `${examRoundLabel(examData)} 채점 결과`;
   elements.resultSummary.innerHTML = `
     <div class="score-card primary">
       <span>민법 환산점수</span>
@@ -647,7 +672,11 @@ function submitExam() {
 }
 
 function resetExam() {
-  if (!window.confirm(`${examData.year}년 저장 답안과 풀이 시간을 모두 지우고 새로 풀까요?`)) {
+  if (
+    !window.confirm(
+      `${examRoundLabel(examData)} 저장 답안과 풀이 시간을 모두 지우고 새로 풀까요?`
+    )
+  ) {
     return;
   }
 
@@ -702,7 +731,7 @@ function renderArchive() {
   elements.archiveEmpty.hidden = filtered.length > 0;
   elements.archiveGrid.innerHTML = filtered
     .map((exam) => {
-      const interactiveExam = !exam.extra ? examByYear.get(exam.year) : null;
+      const interactiveExam = examByRound.get(`${exam.year}-${exam.round}`);
       const title = `${exam.year}년 제${exam.round}회${exam.extra ? " 추가시험" : ""}`;
       const cbtButton = interactiveExam
         ? `<button class="primary-button archive-cbt-button" type="button" data-exam-id="${interactiveExam.id}">민법 CBT 풀기</button>`
@@ -750,7 +779,7 @@ function renderArchive() {
 elements.examSelect.innerHTML = exams
   .map(
     (exam) =>
-      `<option value="${exam.id}">${exam.year}년 · 제${exam.round}회 · ${exam.type}</option>`
+      `<option value="${exam.id}">${examRoundLabel(exam)} · ${exam.type}</option>`
   )
   .join("");
 
