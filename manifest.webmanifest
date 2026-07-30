@@ -1,13 +1,13 @@
 {
-  "name": "공인중개사 기출 풀이 앱",
-  "short_name": "기출 풀이 앱",
+  "name": "공인중개사 민법 기출 CBT",
+  "short_name": "민법 기출 CBT",
   "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f5efe1",
-  "theme_color": "#0f3d3e",
-  "description": "공인중개사 기출문제를 PDF로 보며 답안을 체크하고 채점하는 설치형 웹앱",
+  "background_color": "#f2eee4",
+  "theme_color": "#123d3a",
+  "description": "공인중개사 민법 기출문제를 한 문항씩 풀고 채점하는 설치형 CBT 앱",
   "icons": [
     {
       "src": "./public/icon.svg",

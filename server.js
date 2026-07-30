@@ -31,11 +31,24 @@ function sendFile(filePath, response) {
 }
 
 const server = http.createServer((request, response) => {
-  const safePath = decodeURIComponent(request.url.split("?")[0]);
-  const requestedPath = safePath === "/" ? "/index.html" : safePath;
-  const fullPath = path.join(ROOT, requestedPath);
+  let safePath;
+  try {
+    safePath = decodeURIComponent(request.url.split("?")[0]);
+  } catch {
+    response.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
+    response.end("잘못된 요청 주소입니다.");
+    return;
+  }
 
-  if (!fullPath.startsWith(ROOT)) {
+  const requestedPath = safePath === "/" ? "/index.html" : safePath;
+  const fullPath = path.resolve(ROOT, requestedPath.replace(/^[/\\]+/, ""));
+  const relativePath = path.relative(ROOT, fullPath);
+
+  if (
+    relativePath === ".." ||
+    relativePath.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relativePath)
+  ) {
     response.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
     response.end("접근이 허용되지 않습니다.");
     return;
@@ -51,5 +64,5 @@ const server = http.createServer((request, response) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`공인중개사 기출 풀이 앱 서버 실행: http://127.0.0.1:${PORT}`);
+  console.log(`공인중개사 민법 기출 CBT 서버 실행: http://127.0.0.1:${PORT}`);
 });

@@ -25,6 +25,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Validate CBT data
+        run: node scripts/validate-cbt-data.js
+
       - name: Prepare static site
         run: |
           mkdir -p _site

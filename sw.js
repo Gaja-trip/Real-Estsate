@@ -1,11 +1,14 @@
-const CACHE_NAME = "real-estate-exam-app-v2";
+const CACHE_PREFIX = "real-estate-civil-law-cbt-";
+const LEGACY_CACHE_PREFIX = "real-estate-exam-app-";
+const CACHE_NAME = `${CACHE_PREFIX}v3`;
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css",
-  "./app.js",
+  "./styles.css?v=3",
+  "./app.js?v=3",
   "./manifest.webmanifest",
   "./public/icon.svg",
+  "./public/data/civil-law-2021.js?v=3",
   "./public/pdfs/2021-question.pdf",
   "./public/pdfs/2021-answer.pdf",
   "./public/pdfs/2024-answer.pdf",
@@ -23,7 +26,15 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
+      Promise.all(
+        keys
+          .filter(
+            (key) =>
+              (key.startsWith(CACHE_PREFIX) || key.startsWith(LEGACY_CACHE_PREFIX)) &&
+              key !== CACHE_NAME
+          )
+          .map((key) => caches.delete(key))
+      )
     ).then(() => self.clients.claim())
   );
 });
